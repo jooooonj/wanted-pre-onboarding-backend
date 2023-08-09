@@ -1,0 +1,8 @@
+server:
+  port: ${dev.server.port}
+spring:
+  datasource:
+    driver-class-name: ${dev.db.driver-class-name}
+    url: ${dev.db.url}
+    username: ${dev.db.username}
+    password: ${dev.db.password:NONE}
