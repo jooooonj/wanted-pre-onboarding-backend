@@ -201,4 +201,30 @@ class PostControllerTest {
 
         verify(postService).edit(eq("abcd@1234"), eq(1L), any(EditPostRequest.class));
     }
+
+    @Test
+    @DisplayName("게시글 삭제 요청")
+    @WithMockUser(username = "abcd@1234")
+    void delete() throws Exception {
+        // given
+        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build());
+        EditPostRequest request = EditPostRequest.builder()
+                .title("수정한 제목")
+                .content("수정한 내용")
+                .build();
+
+        //데이터 생성
+        Post post = postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+
+        verify(postService).delete(eq("abcd@1234"), eq(1L));
+    }
 }

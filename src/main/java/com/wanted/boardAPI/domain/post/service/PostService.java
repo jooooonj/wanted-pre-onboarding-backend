@@ -52,10 +52,20 @@ public class PostService {
         Post post = findById(postId);
 
         if(!haveAccessPermission(post, email))
-            throw new IllegalArgumentException("해당 게시글에 대한 접근 권한이 없습니다.");
+            throw new IllegalArgumentException("해당 게시글에 대한 수정 권한이 없습니다.");
 
         post.update(editPostRequest);
         return PostResponse.of(post);
+    }
+
+    @Transactional
+    public void delete(String email, Long postId) {
+        Post post = findById(postId);
+
+        if(!haveAccessPermission(post, email))
+            throw new IllegalArgumentException("해당 게시글에 대한 삭제 권한이 없습니다.");
+
+        postRepository.delete(post);
     }
 
     private boolean haveAccessPermission(Post post, String email){
