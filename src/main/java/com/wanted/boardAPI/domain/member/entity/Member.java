@@ -4,6 +4,8 @@ import com.wanted.boardAPI.base.baseEntity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Map;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -19,4 +21,11 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    public Map<String, Object> toClaims() {
+        return Map.of(
+                "id", getId(),
+                "email", getEmail()
+        );
+    }
 }

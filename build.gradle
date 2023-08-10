@@ -22,6 +22,9 @@ repositories {
 }
 
 dependencies {
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+	testImplementation 'org.projectlombok:lombok:1.18.22'
+
 	//db
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -31,6 +34,7 @@ dependencies {
 	//lombok
 	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok' //추가
 
 	//security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
