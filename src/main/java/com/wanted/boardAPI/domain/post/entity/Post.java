@@ -3,6 +3,7 @@ package com.wanted.boardAPI.domain.post.entity;
 import com.wanted.boardAPI.base.baseEntity.BaseTimeEntity;
 import com.wanted.boardAPI.domain.member.entity.Member;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
+import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,5 +37,12 @@ public class Post extends BaseTimeEntity {
                 createPostRequest.getTitle(),
                 createPostRequest.getContent())
         ;
+    }
+
+    public void update(EditPostRequest editPostRequest) {
+        if(editPostRequest.getTitle().trim().length() > 0)
+            this.title = editPostRequest.getTitle();
+        if(editPostRequest.getContent().trim().length() > 0)
+            this.content = editPostRequest.getContent();
     }
 }

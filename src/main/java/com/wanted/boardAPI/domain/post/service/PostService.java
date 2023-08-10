@@ -4,6 +4,7 @@ import com.wanted.boardAPI.domain.member.entity.Member;
 import com.wanted.boardAPI.domain.member.service.MemberService;
 import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
+import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
 import com.wanted.boardAPI.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +45,20 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
         );
+    }
+
+    @Transactional
+    public PostResponse edit(String email, Long postId, EditPostRequest editPostRequest) {
+        Post post = findById(postId);
+
+        if(!haveAccessPermission(post, email))
+            throw new IllegalArgumentException("해당 게시글에 대한 접근 권한이 없습니다.");
+
+        post.update(editPostRequest);
+        return PostResponse.of(post);
+    }
+
+    private boolean haveAccessPermission(Post post, String email){
+        return post.getMember().getEmail().equals(email);
     }
 }
