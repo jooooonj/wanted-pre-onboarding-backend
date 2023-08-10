@@ -21,9 +21,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -79,6 +79,20 @@ class PostServiceTest {
         postService.findPosts(pageable);
 
         verify(postRepository).findPostsConvertToDto(any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("findPostOne(게시글 단건 조회)") //repository에게 위임
+    void findPostOne() throws Exception {
+        //given
+        PostResponse post = mock(PostResponse.class);
+        given(postRepository.findOneConvertToDto(anyLong())).willReturn(Optional.of(post));
+
+        //when
+        Long postId = 1L;
+        PostResponse savedPost = postService.findPostOne(postId);
+
+        verify(postRepository).findOneConvertToDto(postId);
     }
     
 }

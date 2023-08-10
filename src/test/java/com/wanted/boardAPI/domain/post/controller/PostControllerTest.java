@@ -40,6 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +49,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,24 +75,11 @@ class PostControllerTest {
     @Autowired
     protected PostService postService;
 
-    @BeforeEach
-    void createMember() {
-        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
-                .email("abcd@1234")
-                .password("12345678")
-                .build());
-
-        //더미 데이터 생성
-        for (int i = 0; i < 10; i++) {
-            postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
-        }
-    }
 
     @Test
     @DisplayName("게시글 작성 실패 - 제목 비어있음.")
     @WithMockUser(username = "abcd@1234")
     void create1() throws Exception {
-
         CreatePostRequest request = CreatePostRequest.builder()
                 .title("").content("내용입니다.").build();
 
@@ -131,6 +121,11 @@ class PostControllerTest {
     @WithMockUser(username = "abcd@1234")
     void create3() throws Exception {
         //given
+        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build());
+        memberRepository.save(member);
         CreatePostRequest request = CreatePostRequest.builder()
                 .title("제목입니다.").content("내용입니다").build();
 
@@ -168,5 +163,25 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
+    }
+
+    @Test
+    @DisplayName("게시글 단건 조회")
+    @WithMockUser(username = "abcd@1234")
+    void findOne() throws Exception {
+        // given
+        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build());
+
+        //데이터 생성
+        postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }

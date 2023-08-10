@@ -15,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 @DataJpaTest
 
 public class PostRepositoryTest {
@@ -25,7 +27,7 @@ public class PostRepositoryTest {
     protected MemberRepository memberRepository;
 
     @Test
-    @DisplayName("findPostsConvertToDto")
+    @DisplayName("findPostsConvertToDto()")
     void findPostsConvertToDto() throws Exception {
         //given
         Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
@@ -47,5 +49,27 @@ public class PostRepositoryTest {
         //then
         Assertions.assertThat(posts.getSize()).isEqualTo(size);
         Assertions.assertThat(posts.getNumber()).isEqualTo(page);
+    }
+
+    @Test
+    @DisplayName("findOneConvertToDto()")
+    void findOneConvertToDto() throws Exception {
+        //given
+        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build());
+        Post post = postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
+
+        //when
+        Optional<PostResponse> _findPost = postRepository.findOneConvertToDto(post.getId());
+
+        //then
+        Assertions.assertThat(_findPost).isNotNull();
+        PostResponse findPost = _findPost.get();
+        Assertions.assertThat(findPost.getPostId()).isEqualTo(post.getId());
+        Assertions.assertThat(findPost.getTitle()).isEqualTo(post.getTitle());
+        Assertions.assertThat(findPost.getContent()).isEqualTo(post.getContent());
+        Assertions.assertThat(member.getEmail()).isEqualTo(post.getMember().getEmail());
     }
 }

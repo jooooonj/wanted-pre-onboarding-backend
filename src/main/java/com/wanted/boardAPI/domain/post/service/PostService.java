@@ -33,4 +33,16 @@ public class PostService {
     public Page<PostResponse> findPosts(Pageable pageable) {
         return postRepository.findPostsConvertToDto(pageable);
     }
+
+    public PostResponse findPostOne(Long postId) {
+        return postRepository.findOneConvertToDto(postId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
+        );
+    }
+
+    public Post findById(Long postId){
+        return postRepository.findById(postId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
+        );
+    }
 }
