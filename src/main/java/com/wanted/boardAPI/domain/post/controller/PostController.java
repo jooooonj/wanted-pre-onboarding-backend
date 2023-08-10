@@ -5,6 +5,7 @@ import com.wanted.boardAPI.domain.member.entity.request.JoinMemberRequest;
 import com.wanted.boardAPI.domain.member.service.MemberService;
 import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
+import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
 import com.wanted.boardAPI.domain.post.service.PostService;
 import jakarta.annotation.security.PermitAll;
@@ -46,6 +47,14 @@ public class PostController {
     @GetMapping("{postId}")
     public ResponseEntity<PostResponse> findOne(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.findPostOne(postId));
+    }
+
+    @PatchMapping("{postId}")
+    public ResponseEntity<PostResponse> edit(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long postId,
+            @Valid @RequestBody EditPostRequest editPostRequest) {
+        return ResponseEntity.ok(postService.edit(user.getUsername(), postId, editPostRequest));
     }
 
 }
