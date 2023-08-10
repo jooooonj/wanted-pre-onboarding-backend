@@ -57,4 +57,12 @@ public class PostController {
         return ResponseEntity.ok(postService.edit(user.getUsername(), postId, editPostRequest));
     }
 
+
+    @DeleteMapping("{postId}")
+    public ResponseEntity<Void> edit(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long postId) {
+        postService.delete(user.getUsername(), postId);
+        return ResponseEntity.noContent().build();
+    }
 }
