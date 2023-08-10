@@ -9,6 +9,7 @@ import com.wanted.boardAPI.domain.member.repository.MemberRepository;
 import com.wanted.boardAPI.domain.member.service.MemberService;
 import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
+import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
 import com.wanted.boardAPI.domain.post.repository.PostRepository;
 import com.wanted.boardAPI.domain.post.service.PostService;
@@ -48,8 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
@@ -71,8 +71,7 @@ class PostControllerTest {
     protected MemberRepository memberRepository;
     @Autowired
     protected PostRepository postRepository;
-
-    @Autowired
+    @MockBean
     protected PostService postService;
 
 
@@ -136,11 +135,11 @@ class PostControllerTest {
                                 .content(new ObjectMapper().writeValueAsString(request))
                 )
                 .andExpect(status().isCreated())
+                .andDo(print())
                 .andReturn();
 
         //then
-        String bodyValue = result.getResponse().getContentAsString();
-        Assertions.assertThat(bodyValue).isNotNull();
+        verify(postService).create(eq("abcd@1234"), any(CreatePostRequest.class));
     }
 
     @Test
@@ -148,40 +147,58 @@ class PostControllerTest {
     @WithMockUser(username = "abcd@1234")
     void findPosts() throws Exception {
         // given
-        // Page<PostResponse> 생성
-        List<PostResponse> dummyPosts = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            dummyPosts.add(new PostResponse("user", Long.valueOf(i), "제목" + i, "내용" + i));
-        }
-        Page<PostResponse> posts = new PageImpl<>(dummyPosts);
+        int page = 0;
+        int size = 5;
 
         // when
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts")
-                        .param("page", "0")
-                        .param("size", "5")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
+
+        //then
+        verify(postService).findPosts(any(Pageable.class));
     }
 
     @Test
     @DisplayName("게시글 단건 조회")
     @WithMockUser(username = "abcd@1234")
     void findOne() throws Exception {
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(postService).findPostOne(eq(1L));
+    }
+
+    @Test
+    @DisplayName("게시글 수정 요청")
+    @WithMockUser(username = "abcd@1234")
+    void edit() throws Exception {
         // given
         Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
                 .email("abcd@1234")
                 .password("12345678")
                 .build());
+        EditPostRequest request = EditPostRequest.builder()
+                .title("수정한 제목")
+                .content("수정한 내용")
+                .build();
 
         //데이터 생성
-        postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
+        Post post = postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
 
         // when
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/1")
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.patch("/api/posts/1")
+                        .content(new ObjectMapper().writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        verify(postService).edit(eq("abcd@1234"), eq(1L), any(EditPostRequest.class));
     }
 }
