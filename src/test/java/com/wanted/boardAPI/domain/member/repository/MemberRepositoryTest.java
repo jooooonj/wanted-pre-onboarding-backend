@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest
 class MemberRepositoryTest {
     @Autowired
-    MemberRepository memberRepository;
+    protected MemberRepository memberRepository;
 
     @Test
     @DisplayName("findByEmail")
