@@ -8,6 +8,7 @@ import com.wanted.boardAPI.global.config.SecurityConfig;
 import com.wanted.boardAPI.global.jwt.JwtAuthorizationFilter;
 import com.wanted.boardAPI.global.jwt.JwtToken;
 import com.wanted.boardAPI.global.jwt.JwtTokenProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         JwtTokenProvider.class}
         )
 @ActiveProfiles("test")
+@Slf4j
 class MemberControllerTest {
     @Autowired
     protected MemberController memberController;
@@ -82,6 +84,7 @@ class MemberControllerTest {
                 .andReturn();// 400 Bad Request
 
         String message = result.getResolvedException().getMessage();
+        log.debug("errorMessage : {} ", message);
         Assertions.assertThat(message).contains("비밀번호는 8자 이상 입력해주세요.");
     }
 
@@ -99,8 +102,8 @@ class MemberControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        //memberService의 join 메서드가 실제로 실행되는지
-//        verify(memberService).join(any(JoinMemberRequest.class));
+//        memberService의 join 메서드가 실제로 실행되는지
+        verify(memberService).join(any(JoinMemberRequest.class));
     }
 
     @Test
@@ -118,6 +121,7 @@ class MemberControllerTest {
                 .andReturn();// 400 Bad Request
 
         String message = result.getResolvedException().getMessage();
+        log.debug("errorMessage : {} ", message);
         Assertions.assertThat(message).contains("이메일은 '@'를 반드시 포함해야 합니다.");
     }
 
@@ -136,11 +140,12 @@ class MemberControllerTest {
                 .andReturn();// 400 Bad Request
 
         String message = result.getResolvedException().getMessage();
+        log.debug("errorMessage : {} ", message);
         Assertions.assertThat(message).contains("비밀번호는 8자 이상 입력해주세요.");
     }
 
     @Test
-    @DisplayName("로그인 요청 성공 - response의 Header(Authentication)에 값이 존재한다.")
+    @DisplayName("로그인 요청 성공.")
     void login() throws Exception {
         //given
         LoginMemberRequest request = LoginMemberRequest.builder()
