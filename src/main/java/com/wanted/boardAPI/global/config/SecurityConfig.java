@@ -36,7 +36,11 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(STATELESS)
                 ) // 세션끄기
-;
+                .addFilterBefore(
+                        jwtAuthorizationFilter, // 엑세스 토큰으로 부터 로그인 처리
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
         return http.build();
     }
 
