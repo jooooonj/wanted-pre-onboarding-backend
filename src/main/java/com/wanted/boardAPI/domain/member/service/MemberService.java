@@ -23,8 +23,10 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public Optional<Member> findByEmail(String email){
-        return memberRepository.findByEmail(email);
+    public Member findByEmail(String email){
+        return memberRepository.findByEmail(email).orElseThrow(
+                () -> new IllegalArgumentException(email+"로 가입된 계정이 존재하지 않습니다.")
+        );
     }
 
     @Transactional
@@ -41,9 +43,7 @@ public class MemberService {
     }
 
     public JwtToken login(LoginMemberRequest loginMemberRequest) {
-        Member member = findByEmail(loginMemberRequest.getEmail()).orElse(null);
-        if (member == null)
-            throw new IllegalArgumentException(loginMemberRequest.getEmail()+"로 가입된 계정이 존재하지 않습니다.");
+        Member member = findByEmail(loginMemberRequest.getEmail());
 
         if (!passwordEncoder.matches(loginMemberRequest.getPassword(), member.getPassword()))
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
@@ -53,6 +53,6 @@ public class MemberService {
 
     //이메일 중복 체크, 중복이면 true
     private boolean checkDuplicateEmail(String email) {
-        return memberRepository.findByEmail(email).isPresent();
+        return  memberRepository.findByEmail(email).isPresent();
     }
 }
