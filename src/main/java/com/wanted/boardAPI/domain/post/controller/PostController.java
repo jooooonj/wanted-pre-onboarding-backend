@@ -42,4 +42,10 @@ public class PostController {
         Page<PostResponse> posts = postService.findPosts(pageable);
         return ResponseEntity.ok(posts);
     }
+
+    @GetMapping("{postId}")
+    public ResponseEntity<PostResponse> findOne(@PathVariable Long postId) {
+        return ResponseEntity.ok(postService.findPostOne(postId));
+    }
+
 }
