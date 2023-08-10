@@ -4,6 +4,7 @@ import com.wanted.boardAPI.domain.member.entity.Member;
 import com.wanted.boardAPI.domain.member.service.MemberService;
 import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
+import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
 import com.wanted.boardAPI.domain.post.repository.PostRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -67,7 +69,8 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("findPosts(게시글 목록 조회)") //repository에게 위임
+    @DisplayName("findPosts(게시글 목록 조회)")
+        //repository에게 위임
     void findPosts() throws Exception {
         int page = 0;
         int size = 5;
@@ -82,7 +85,8 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("findPostOne(게시글 단건 조회)") //repository에게 위임
+    @DisplayName("findPostOne(게시글 단건 조회)")
+        //repository에게 위임
     void findPostOne() throws Exception {
         //given
         PostResponse post = mock(PostResponse.class);
@@ -94,5 +98,61 @@ class PostServiceTest {
 
         verify(postRepository).findOneConvertToDto(postId);
     }
-    
+
+    @Test
+    @DisplayName("edit(게시글 수정) 실패 - 작성자 본인이 아닌 경우")
+    void edit1() throws Exception {
+        //given
+        Member member1 = Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build();
+        Member member2 = Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("defg@5678")
+                .password("12345678")
+                .build();
+        Post post = Post.of(member2, new CreatePostRequest("기존 제목", "기존 내용"));
+        EditPostRequest request = EditPostRequest.builder()
+                .content("새로운 내용")
+                .title("새로운 제목")
+                .build();
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        //when
+        Long postId = 1L;
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+            postService.edit(member1.getEmail(), postId, request);
+        });
+
+        //then
+        log.debug("errorMessage : {}", e.getMessage());
+        Assertions.assertThat(e.getMessage()).isEqualTo("해당 게시글에 대한 접근 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("edit(게시글 수정) 성공")
+    void edit2() throws Exception {
+        //given
+        Member member1 = Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build();
+
+        Post post = Post.of(member1, new CreatePostRequest("기존 제목", "기존 내용"));
+        EditPostRequest request = EditPostRequest.builder()
+                .content("새로운 내용")
+                .title("새로운 제목")
+                .build();
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        //when
+        Long postId = 1L;
+        PostResponse response = postService.edit(member1.getEmail(), postId, request);
+
+        //then
+        Assertions.assertThat(post.getContent()).isEqualTo("새로운 내용");
+        Assertions.assertThat(post.getTitle()).isEqualTo("새로운 제목");
+        Assertions.assertThat(response.getContent()).isEqualTo("새로운 내용");
+        Assertions.assertThat(response.getTitle()).isEqualTo("새로운 제목");
+    }
 }
