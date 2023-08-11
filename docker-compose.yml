@@ -5,7 +5,9 @@ services:
     container_name: mysql_1
     restart: unless-stopped
     environment: # 환경 설정
+      - MARIADB_DATABASE=wanted__prod
       - MARIADB_ROOT_PASSWORD=lldj123414
+      - MARIADB_ROOT_HOST=%
       - TZ=Asia/Seoul
     ports: #port 지정
       - 3306:3306
@@ -14,27 +16,24 @@ services:
       - /docker_projects/mariadb_1/mysql:/var/lib/mysql
       - /docker_projects/mariadb_1/run/mysqld:/run/mysqld/
     networks: #사용할 네트워크 지정
-      - boardAPI_network
+      - boardapi_network
     command: >
       sh -c "mysql -h localhost -u root -p'\$MYSQL_ROOT_PASSWORD' -e '
       CREATE DATABASE IF NOT EXISTS wanted__prod;
-      CREATE DATABASE IF NOT EXISTS nginx;
       GRANT ALL PRIVILEGES ON *.* TO \"lldj\"@\"%\" IDENTIFIED BY \"lldj123414\";
       GRANT ALL PRIVILEGES ON *.* TO \"lldjlocal\"@\"127.0.0.1\" IDENTIFIED BY \"1234\";
       GRANT ALL PRIVILEGES ON *.* TO \"lldjlocal\"@\"172.17.%.%\" IDENTIFIED BY \"1234\";
       '"
 
   webapp:
-    build: #image를 DockerFile 기반으로 사용한다
-      context: .    #DockerFile이 있는 디렉토리
-      dockerfile: Dockerfile    #기존에 설정해둔 DockerFile을 지정히여 build 된 jar 파일을 container에 올린다.
+    build: .
     restart: always        #컨테이너 재실행
     depends_on: #database service가 실행된 이후에 실행
       - database
     ports:
       - 8080:8080
-    container_name: boardApi_1
+    container_name: boardapi_1
     networks:
       - boardAPI_network
-networks:	#네트워크 설정
-  boardAPI_network:
+networks:
+  boardapi_network:
