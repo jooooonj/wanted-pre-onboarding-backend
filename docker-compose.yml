@@ -16,7 +16,6 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 이 부분 추가
     networks: #사용할 네트워크 지정
       - boardapi_network
-    command: --init-file /docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MARIADB_ROOT_PASSWORD" ]
       interval: 10s
@@ -24,7 +23,9 @@ services:
       retries: 3
 
   board:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always        #컨테이너 재실행
     container_name: board_1
     depends_on: #database service가 실행된 이후에 실행
@@ -32,6 +33,9 @@ services:
     ports:
       - 80:8080
     environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb_1:3306/wanted__prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true
+      SPRING_DATASOURCE_USERNAME: "lldjlocal"
+      SPRING_DATASOURCE_PASSWORD: "1234"
       TZ: "Asia/Seoul"
     networks:
       - boardapi_network
