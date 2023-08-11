@@ -60,7 +60,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @Transactional
-@ActiveProfiles("test")
 @Slf4j
 class PostControllerTest {
     @Autowired
