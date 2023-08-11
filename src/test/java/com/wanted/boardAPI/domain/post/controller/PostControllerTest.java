@@ -144,7 +144,6 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 목록 조회")
-    @WithMockUser(username = "abcd@1234")
     void findPosts() throws Exception {
         // given
         int page = 0;
@@ -165,7 +164,6 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 단건 조회")
-    @WithMockUser(username = "abcd@1234")
     void findOne() throws Exception {
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/1")
                         .contentType(MediaType.APPLICATION_JSON))

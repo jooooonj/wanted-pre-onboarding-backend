@@ -1,31 +1,38 @@
 version: "3"
 services:
-  database:
+  mariadb_1:
     image: mariadb:latest
     container_name: mariadb_1
     restart: unless-stopped
     environment: # 환경 설정
-      - MARIADB_DATABASE=wanted__prod
       - MARIADB_ROOT_PASSWORD=lldj123414
       - TZ=Asia/Seoul
     ports: #port 지정
       - 3306:3306
     volumes: #볼륨 지정
-      - ./mysql-init.d:/docker-entrypoint-initdb.d
+      - /docker_projects/mariadb_1/conf.d:/etc/mysql/conf.d
+      - /docker_projects/mariadb_1/mysql:/var/lib/mysql
+      - /docker_projects/mariadb_1/run/mysqld:/run/mysqld/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 이 부분 추가
     networks: #사용할 네트워크 지정
       - boardapi_network
-    command:
-      - '--character-set-server=utf8mb4'
-      - '--collation-server=utf8mb4_unicode_ci'
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MARIADB_ROOT_PASSWORD" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-  webapp:
+  board:
     build: .
     restart: always        #컨테이너 재실행
+    container_name: board_1
     depends_on: #database service가 실행된 이후에 실행
-      - database
+      - mariadb_1
     ports:
-      - 8080:8080
-    container_name: boardapi_1
+      - 80:8080
+    environment:
+      TZ: "Asia/Seoul"
     networks:
       - boardapi_network
 networks:
