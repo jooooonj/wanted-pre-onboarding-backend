@@ -3,7 +3,6 @@ services:
   mariadb_1:
     image: mariadb:latest
     container_name: mariadb_1
-    restart: unless-stopped
     environment: # 환경 설정
       - MARIADB_ROOT_PASSWORD=lldj123414
       - TZ=Asia/Seoul
@@ -26,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: always        #컨테이너 재실행
+    restart: on-failure #컨테이너 재실행
     container_name: board_1
     depends_on: #database service가 실행된 이후에 실행
       - mariadb_1
