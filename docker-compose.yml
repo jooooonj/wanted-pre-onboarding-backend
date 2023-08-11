@@ -1,29 +1,22 @@
 version: "3"
 services:
   database:
-    image: mysql
-    container_name: mysql_1
+    image: mariadb:latest
+    container_name: mariadb_1
     restart: unless-stopped
     environment: # 환경 설정
       - MARIADB_DATABASE=wanted__prod
       - MARIADB_ROOT_PASSWORD=lldj123414
-      - MARIADB_ROOT_HOST=%
       - TZ=Asia/Seoul
     ports: #port 지정
       - 3306:3306
     volumes: #볼륨 지정
-      - /docker_projects/mariadb_1/conf.d:/etc/mysql/conf.d
-      - /docker_projects/mariadb_1/mysql:/var/lib/mysql
-      - /docker_projects/mariadb_1/run/mysqld:/run/mysqld/
+      - ./mysql-init.d:/docker-entrypoint-initdb.d
     networks: #사용할 네트워크 지정
       - boardapi_network
-    command: >
-      sh -c "mysql -h localhost -u root -p'\$MYSQL_ROOT_PASSWORD' -e '
-      CREATE DATABASE IF NOT EXISTS wanted__prod;
-      GRANT ALL PRIVILEGES ON *.* TO \"lldj\"@\"%\" IDENTIFIED BY \"lldj123414\";
-      GRANT ALL PRIVILEGES ON *.* TO \"lldjlocal\"@\"127.0.0.1\" IDENTIFIED BY \"1234\";
-      GRANT ALL PRIVILEGES ON *.* TO \"lldjlocal\"@\"172.17.%.%\" IDENTIFIED BY \"1234\";
-      '"
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
 
   webapp:
     build: .
@@ -34,6 +27,6 @@ services:
       - 8080:8080
     container_name: boardapi_1
     networks:
-      - boardAPI_network
+      - boardapi_network
 networks:
   boardapi_network:
