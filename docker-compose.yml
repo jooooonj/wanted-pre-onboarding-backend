@@ -4,27 +4,18 @@ services:
     image: mariadb:latest
     container_name: mariadb_1
     environment: # 환경 설정
+      - MARIADB_DATABASE=wanted__prod
+      - MARIADB_ROOT_HOST=%
       - MARIADB_ROOT_PASSWORD=lldj123414
-      - TZ=Asia/Seoul
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     ports: #port 지정
       - 3306:3306
-    volumes: #볼륨 지정
-      - /docker_projects/mariadb_1/conf.d:/etc/mysql/conf.d
-      - /docker_projects/mariadb_1/mysql:/var/lib/mysql
-      - /docker_projects/mariadb_1/run/mysqld:/run/mysqld/
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 이 부분 추가
-    networks: #사용할 네트워크 지정
-      - boardapi_network
-    healthcheck:
-      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$MARIADB_ROOT_PASSWORD" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
+    volumes:
+      - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/mariadb/var/log/maria:/var/log/maria
   board:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     restart: on-failure #컨테이너 재실행
     container_name: board_1
     depends_on: #database service가 실행된 이후에 실행
@@ -32,11 +23,8 @@ services:
     ports:
       - 80:8080
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb_1:3306/wanted__prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true
-      SPRING_DATASOURCE_USERNAME: "lldjlocal"
-      SPRING_DATASOURCE_PASSWORD: "1234"
-      TZ: "Asia/Seoul"
-    networks:
-      - boardapi_network
-networks:
-  boardapi_network:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb_1:3306/wanted__prod?useUnicode=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+
+
