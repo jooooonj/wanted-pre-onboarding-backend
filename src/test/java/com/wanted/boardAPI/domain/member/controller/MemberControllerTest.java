@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         JwtAuthorizationFilter.class,
         JwtTokenProvider.class}
         )
-@ActiveProfiles("test")
 @Slf4j
 class MemberControllerTest {
     @Autowired

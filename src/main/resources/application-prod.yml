@@ -1,9 +1,9 @@
 spring:
-#  datasource:
-#    driver-class-name: ${prod.db.driver-class-name}
-#    url: ${prod.db.url}
-#    username: ${prod.db.username}
-#    password: ${prod.db.password:NONE}
+  datasource:
+    driver-class-name: ${prod.db.driver-class-name}
+    url: ${prod.db.url}
+    username: ${prod.db.username}
+    password: ${prod.db.password:NONE}
   jpa:
     hibernate:
       ddl-auto: update

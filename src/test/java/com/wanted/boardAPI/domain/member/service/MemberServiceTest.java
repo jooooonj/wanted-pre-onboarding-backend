@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 //단위테스트
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@ActiveProfiles("test")
 class MemberServiceTest {
 
     @InjectMocks

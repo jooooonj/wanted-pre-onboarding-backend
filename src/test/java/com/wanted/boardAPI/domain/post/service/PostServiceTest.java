@@ -33,7 +33,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@ActiveProfiles("test")
 class PostServiceTest {
 
     @InjectMocks

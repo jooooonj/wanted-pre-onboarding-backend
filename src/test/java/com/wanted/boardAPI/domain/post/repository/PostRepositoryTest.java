@@ -19,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Optional;
 
 @DataJpaTest
-@ActiveProfiles("test")
 public class PostRepositoryTest {
     @Autowired
     protected PostRepository postRepository;

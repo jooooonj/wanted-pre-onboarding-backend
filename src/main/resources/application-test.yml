@@ -1,9 +1,9 @@
 spring:
   datasource:
-    driver-class-name: ${test.db.driver-class-name}
-    url: ${test.db.url}
-    username: ${test.db.username}
-    password: ${test.db.password:NONE}
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;
+    username: sa
+    password:
   jpa:
     hibernate:
       ddl-auto: create
