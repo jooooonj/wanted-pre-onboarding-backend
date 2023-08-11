@@ -1,1 +1,20 @@
-
+spring:
+  datasource:
+    driver-class-name: ${prod.db.driver-class-name}
+    url: ${prod.db.url}
+    username: ${prod.db.username}
+    password: ${prod.db.password:NONE}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
+logging:
+  level:
+    root: INFO
+    com.ll.gramgram: INFO
+    org.hibernate.orm.jdbc.bind: INFO
+    org.hibernate.orm.jdbc.extract: INFO
