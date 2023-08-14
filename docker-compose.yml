@@ -1,0 +1,33 @@
+version: "3"
+services:
+  mariadb_1:
+    image: mariadb:latest
+    container_name: mariadb_1
+    environment: # 환경 설정
+      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_ROOT_HOST=${MARIADB_ROOT_HOST}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+    ports: #port 지정
+      - 3306:3306
+    volumes:
+      - ./db/data:/var/lib/mysql
+    networks:
+      - board_network
+  board:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always #컨테이너 재실행
+    container_name: board_1
+    ports:
+      - 80:8080
+    networks:
+      - board_network
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      prod_db_url: ${prod_db_url}
+      prod_db_username: ${prod_db_username}
+      prod_db_password: ${prod_db_password}
+      jwt_secretKey: ${jwt_secretKey}
+networks:
+  board_network:
