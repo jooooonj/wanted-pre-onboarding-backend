@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,14 +127,14 @@ class PostServiceTest {
 
         //then
         log.debug("errorMessage : {}", e.getMessage());
-        Assertions.assertThat(e.getMessage()).isEqualTo("해당 게시글에 대한 접근 권한이 없습니다.");
+        Assertions.assertThat(e.getMessage()).isEqualTo("해당 게시글에 대한 수정 권한이 없습니다.");
     }
 
     @Test
     @DisplayName("edit(게시글 수정) 성공")
     void edit2() throws Exception {
         //given
-        Member member1 = Member.builder() //"abcd@1234 계정으로 찾은 member
+        Member member1 = Member.builder()
                 .email("abcd@1234")
                 .password("12345678")
                 .build();
@@ -154,5 +155,53 @@ class PostServiceTest {
         Assertions.assertThat(post.getTitle()).isEqualTo("새로운 제목");
         Assertions.assertThat(response.getContent()).isEqualTo("새로운 내용");
         Assertions.assertThat(response.getTitle()).isEqualTo("새로운 제목");
+    }
+
+    @Test
+    @DisplayName("delete(게시글 삭제) 실패 - 작성자 본인이 아닌 경우")
+    void delete1() throws Exception {
+        //given
+        Member member1 = Member.builder()
+                .email("abcd@1234")
+                .password("12345678")
+                .build();
+        Member member2 = Member.builder()
+                .email("defg@5678")
+                .password("12345678")
+                .build();
+        Post post = Post.of(member2, new CreatePostRequest("기존 제목", "기존 내용"));
+
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        //when
+        Long postId = 1L;
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+            postService.delete(member1.getEmail(), postId);
+        });
+
+        //then
+        log.debug("errorMessage : {}", e.getMessage());
+        Assertions.assertThat(e.getMessage()).isEqualTo("해당 게시글에 대한 삭제 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("delete(게시글 삭제) 성공")
+    void delete2() throws Exception {
+        //given
+        Member member1 = Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build();
+
+        Post post = Post.of(member1, new CreatePostRequest("기존 제목", "기존 내용"));
+
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+
+        //when
+        Long postId = 1L;
+        postService.delete(member1.getEmail(), postId);
+
+        //then
+        verify(postRepository).delete(any(Post.class));
     }
 }

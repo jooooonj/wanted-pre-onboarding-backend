@@ -60,8 +60,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @Transactional
-@ActiveProfiles("test")
 @Slf4j
+@ActiveProfiles("test")
 class PostControllerTest {
     @Autowired
     protected MockMvc mockMvc;
@@ -144,7 +144,6 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 목록 조회")
-    @WithMockUser(username = "abcd@1234")
     void findPosts() throws Exception {
         // given
         int page = 0;
@@ -165,7 +164,6 @@ class PostControllerTest {
 
     @Test
     @DisplayName("게시글 단건 조회")
-    @WithMockUser(username = "abcd@1234")
     void findOne() throws Exception {
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/posts/1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -200,5 +198,31 @@ class PostControllerTest {
                 .andExpect(status().isOk());
 
         verify(postService).edit(eq("abcd@1234"), eq(1L), any(EditPostRequest.class));
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 요청")
+    @WithMockUser(username = "abcd@1234")
+    void delete() throws Exception {
+        // given
+        Member member = memberRepository.save(Member.builder() //"abcd@1234 계정으로 찾은 member
+                .email("abcd@1234")
+                .password("12345678")
+                .build());
+        EditPostRequest request = EditPostRequest.builder()
+                .title("수정한 제목")
+                .content("수정한 내용")
+                .build();
+
+        //데이터 생성
+        Post post = postRepository.save(Post.of(member, new CreatePostRequest("제목1", "내용1")));
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/api/posts/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+
+        verify(postService).delete(eq("abcd@1234"), eq(1L));
     }
 }
