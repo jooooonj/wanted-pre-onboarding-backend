@@ -47,6 +47,7 @@ public class JwtTokenProvider {
                 .compact();
 
         return JwtToken.builder()
+                .type("MEMBER")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

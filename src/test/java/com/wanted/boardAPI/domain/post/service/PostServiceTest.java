@@ -6,6 +6,7 @@ import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
 import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
+import com.wanted.boardAPI.domain.post.exception.PostAccessFailException;
 import com.wanted.boardAPI.domain.post.repository.PostRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -121,7 +122,7 @@ class PostServiceTest {
 
         //when
         Long postId = 1L;
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+        PostAccessFailException e = assertThrows(PostAccessFailException.class, () -> {
             postService.edit(member1.getEmail(), postId, request);
         });
 
@@ -175,7 +176,7 @@ class PostServiceTest {
 
         //when
         Long postId = 1L;
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+        PostAccessFailException e = assertThrows(PostAccessFailException.class, () -> {
             postService.delete(member1.getEmail(), postId);
         });
 

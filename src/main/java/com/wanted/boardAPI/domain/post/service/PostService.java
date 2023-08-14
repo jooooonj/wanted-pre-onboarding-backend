@@ -6,6 +6,8 @@ import com.wanted.boardAPI.domain.post.entity.Post;
 import com.wanted.boardAPI.domain.post.entity.request.CreatePostRequest;
 import com.wanted.boardAPI.domain.post.entity.request.EditPostRequest;
 import com.wanted.boardAPI.domain.post.entity.response.PostResponse;
+import com.wanted.boardAPI.domain.post.exception.PostAccessFailException;
+import com.wanted.boardAPI.domain.post.exception.PostNotFoundException;
 import com.wanted.boardAPI.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,13 +39,13 @@ public class PostService {
 
     public PostResponse findPostOne(Long postId) {
         return postRepository.findOneConvertToDto(postId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
+                () -> new PostNotFoundException("존재하지 않는 게시글입니다.")
         );
     }
 
     public Post findById(Long postId){
         return postRepository.findById(postId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
+                () -> new PostNotFoundException("존재하지 않는 게시글입니다.")
         );
     }
 
@@ -52,7 +54,7 @@ public class PostService {
         Post post = findById(postId);
 
         if(!haveAccessPermission(post, email))
-            throw new IllegalArgumentException("해당 게시글에 대한 수정 권한이 없습니다.");
+            throw new PostAccessFailException("해당 게시글에 대한 수정 권한이 없습니다.");
 
         post.update(editPostRequest);
         return PostResponse.of(post);
@@ -63,7 +65,7 @@ public class PostService {
         Post post = findById(postId);
 
         if(!haveAccessPermission(post, email))
-            throw new IllegalArgumentException("해당 게시글에 대한 삭제 권한이 없습니다.");
+            throw new PostAccessFailException("해당 게시글에 대한 삭제 권한이 없습니다.");
 
         postRepository.delete(post);
     }

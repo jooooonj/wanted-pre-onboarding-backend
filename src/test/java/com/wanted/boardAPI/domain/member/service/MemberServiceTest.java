@@ -3,6 +3,9 @@ package com.wanted.boardAPI.domain.member.service;
 import com.wanted.boardAPI.domain.member.entity.Member;
 import com.wanted.boardAPI.domain.member.entity.request.JoinMemberRequest;
 import com.wanted.boardAPI.domain.member.entity.request.LoginMemberRequest;
+import com.wanted.boardAPI.domain.member.exception.MemberDuplicateEmailException;
+import com.wanted.boardAPI.domain.member.exception.MemberNotFoundException;
+import com.wanted.boardAPI.domain.member.exception.MemberPasswordNotCorrectException;
 import com.wanted.boardAPI.domain.member.repository.MemberRepository;
 import com.wanted.boardAPI.global.jwt.JwtToken;
 import com.wanted.boardAPI.global.jwt.JwtTokenProvider;
@@ -70,7 +73,7 @@ class MemberServiceTest {
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.of(member)); //값이 있는 경우
 
         //when
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+        MemberDuplicateEmailException e = assertThrows(MemberDuplicateEmailException.class, () -> {
             memberService.join(request);
         });
 
@@ -89,7 +92,7 @@ class MemberServiceTest {
         given(memberRepository.findByEmail(request.getEmail())).willReturn(Optional.empty()); //값이 없는 경우
 
         //when
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+        MemberNotFoundException e = assertThrows(MemberNotFoundException.class, () -> {
             memberService.login(request);
         });
 
@@ -120,7 +123,7 @@ class MemberServiceTest {
             given(passwordEncoder.matches(request.getPassword(), member.getPassword())).willReturn(false);
 
         //when
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> {
+        MemberPasswordNotCorrectException e = assertThrows(MemberPasswordNotCorrectException.class, () -> {
             memberService.login(request);
         });
 

@@ -3,6 +3,9 @@ package com.wanted.boardAPI.domain.member.service;
 import com.wanted.boardAPI.domain.member.entity.Member;
 import com.wanted.boardAPI.domain.member.entity.request.JoinMemberRequest;
 import com.wanted.boardAPI.domain.member.entity.request.LoginMemberRequest;
+import com.wanted.boardAPI.domain.member.exception.MemberDuplicateEmailException;
+import com.wanted.boardAPI.domain.member.exception.MemberNotFoundException;
+import com.wanted.boardAPI.domain.member.exception.MemberPasswordNotCorrectException;
 import com.wanted.boardAPI.domain.member.repository.MemberRepository;
 import com.wanted.boardAPI.global.jwt.JwtToken;
 import com.wanted.boardAPI.global.jwt.JwtTokenProvider;
@@ -25,14 +28,14 @@ public class MemberService {
 
     public Member findByEmail(String email){
         return memberRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException(email+"로 가입된 계정이 존재하지 않습니다.")
+                () -> new MemberNotFoundException(email+"로 가입된 계정이 존재하지 않습니다.")
         );
     }
 
     @Transactional
     public Long join(JoinMemberRequest joinMemberRequest){
         if(checkDuplicateEmail(joinMemberRequest.getEmail()))
-            throw new IllegalArgumentException("해당 이메일로 가입된 계정이 존재합니다.");
+            throw new MemberDuplicateEmailException("해당 이메일로 가입된 계정이 존재합니다.");
 
         Member member = Member.builder()
                 .email(joinMemberRequest.getEmail())
@@ -46,7 +49,7 @@ public class MemberService {
         Member member = findByEmail(loginMemberRequest.getEmail());
 
         if (!passwordEncoder.matches(loginMemberRequest.getPassword(), member.getPassword()))
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberPasswordNotCorrectException("비밀번호가 일치하지 않습니다.");
 
         return jwtTokenProvider.genToken(member.toClaims(), 60 * 60 * 1); //1시간
     }
