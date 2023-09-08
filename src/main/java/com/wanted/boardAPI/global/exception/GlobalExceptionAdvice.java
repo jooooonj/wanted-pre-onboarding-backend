@@ -43,30 +43,4 @@ public class GlobalExceptionAdvice {
         return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }
 
-    //POST
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<ErrorResponse> PostNotFoundExceptionHandler(PostNotFoundException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        log.error("[exceptionHandle] ex", e);
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
-        return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(PostAccessFailException.class)
-    public ResponseEntity<ErrorResponse> PostAccessFailExceptionHandler(PostAccessFailException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        log.error("[exceptionHandle] ex", e);
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
-        return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> methodValidException(MethodArgumentNotValidException e, HttpServletRequest request){
-        log.error("[exceptionHandle] ex", e);
-        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.REQUEST_VALID_FAIL.getCode()
-                ,e.getBindingResult().getFieldError().getDefaultMessage());
-        return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-
 }

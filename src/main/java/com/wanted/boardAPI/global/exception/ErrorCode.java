@@ -25,6 +25,4 @@ public enum ErrorCode {
         this.code = code;
         this.description = description;
     }
-
-
 }

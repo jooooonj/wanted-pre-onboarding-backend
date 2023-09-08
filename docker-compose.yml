@@ -4,9 +4,9 @@ services:
     image: mariadb:latest
     container_name: mariadb_1
     environment: # 환경 설정
-      - MARIADB_DATABASE=${MARIADB_DATABASE}
-      - MARIADB_ROOT_HOST=${MARIADB_ROOT_HOST}
-      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=board
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=lldj123414
     ports: #port 지정
       - 3306:3306
     volumes:
@@ -19,15 +19,17 @@ services:
       dockerfile: Dockerfile
     restart: always #컨테이너 재실행
     container_name: board_1
+    depends_on:
+      - mariadb_1
     ports:
       - 80:8080
     networks:
       - board_network
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      prod_db_url: ${prod_db_url}
-      prod_db_username: ${prod_db_username}
-      prod_db_password: ${prod_db_password}
-      jwt_secretKey: ${jwt_secretKey}
+      prod_db_url: jdbc:mariadb://mariadb_1:3306/board?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+      prod_db_username: root
+      prod_db_password: lldj123414
+      jwt_secretKey: aslfnasldfnlkasnflksanflkasndfnsadflkasdlfknasdlkfnlaskdfnklasndflasndflnasdlfnaslkdfnlkasdfnlkaasldfnaslkdn
 networks:
   board_network:
