@@ -1,4 +1,4 @@
-# wanted-pre-onboarding-backend 과제
+# Board (Member, Post) API
 
 ## 이름 : 이재준
 
